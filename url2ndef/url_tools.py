@@ -18,15 +18,10 @@ def identificar_protocolo(url):
 # Function to get the length of the rest and convert to hex
 def obtener_longitud_resto(url):
     protocols = ["https://www.", "http://www.", "https://", "http://", "ftp://"]
-    for protocol in protocols:
-        if url.startswith(protocol):
-            resto = url[len(protocol):]
-            break
-    else:
-        resto = url  
+    resto = next((url[len(protocol):] for protocol in protocols if url.startswith(protocol)), url)
 
     # Convert the rest of the URL to hex (UTF-8 encoding)
-    resto_hex = ''.join([format(byte, '02X') for byte in bytearray(resto, 'utf-8')])
+    resto_hex = [format(byte, '02X') for byte in bytearray(resto, 'utf-8')]
     return len(resto) + 1, [resto_hex[i:i+2] for i in range(0, len(resto_hex), 2)]
 
 # Function to generate the NDEF structure
@@ -45,6 +40,6 @@ def generar_ndef(url):
     STRUCTURE_NDEF = [NFC_TYPE, LENGTH_RECORD, LENGTH_PAYLOAD, URI_TYPE, URI_IDENTIFIER, STRING]
 
     # Final result
-    resultado = ' '.join([num.zfill(2) if len(num) < 2 else num for num in ' '.join(STRUCTURE_NDEF).split()])
+    resultado = ' '.join([num.zfill(2) for num in ' '.join(STRUCTURE_NDEF).split()])
 
     return resultado
